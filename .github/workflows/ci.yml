@@ -121,6 +121,7 @@ jobs:
       with:
         version: v1.56.2
   publish-provenance:
+    name: Publish Image Provenance
     if: ${{ github.event_name != 'pull_request' }}
     needs:
       - build

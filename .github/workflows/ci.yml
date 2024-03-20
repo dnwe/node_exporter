@@ -23,6 +23,9 @@ jobs:
   build:
     name: Build Binary and Docker Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+      packages: write  # to upload docker image(s) to ghcr.io
     env:
       GOFLAGS: -trimpath
       GOOS: linux
@@ -99,11 +102,11 @@ jobs:
         name: test-results
         path: test-results/
   lint:
+    name: Linting with Go ${{ matrix.go-version }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read  # for actions/checkout to fetch code
       pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
-    name: Linting with Go ${{ matrix.go-version }}
-    runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1

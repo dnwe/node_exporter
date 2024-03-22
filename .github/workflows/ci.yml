@@ -25,7 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read  # for actions/checkout to fetch code
-      packages: write  # to upload docker image(s) to ghcr.io
+      packages: write # to upload docker image(s) to ghcr.io
+      id-token: write # identity challenge with sigstore/fulcio
     env:
       GOFLAGS: -trimpath
       GOOS: linux

@@ -57,7 +57,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build Docker Image (and push if not PR)
-      id: push
+      id: build-and-push
       uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
       with:
         context: .
@@ -70,6 +70,18 @@ jobs:
           type=gha,scope=${{ github.workflow }}
         cache-to: |
           type=gha,scope=${{ github.workflow }},mode=max
+    - name: Install cosign (if signing)
+      if: github.event_name != 'pull_request'
+      uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+    - name: Sign the published Docker image
+      if: ${{ github.event_name != 'pull_request' }}
+      env:
+        # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+        TAGS: ${{ steps.meta.outputs.tags }}
+        DIGEST: ${{ steps.build-and-push.outputs.digest }}
+      # This step uses the identity token to provision an ephemeral certificate
+      # against the sigstore community Fulcio instance.
+      run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
     - name: Generate SBOM with Trivy
       uses: aquasecurity/trivy-action@062f2592684a31eb3aa050cc61e7ca1451cecd3d # v0.18.0
       with:
@@ -99,7 +111,7 @@ jobs:
         retention-days: 14 # 90 is the default
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
-      image-digest: ${{ steps.push.outputs.digest }}
+      image-digest: ${{ steps.build-and-push.outputs.digest }}
   test:
     name: Unit Testing
     runs-on: ubuntu-latest

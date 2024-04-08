@@ -63,7 +63,7 @@ jobs:
         if-no-files-found: error
         retention-days: 14 # 90 is the default
     - name: Setup Docker
-      uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
+      uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
       id: buildx
     - name: Extract GitHub Metadata for Docker
       id: meta
